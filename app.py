@@ -128,7 +128,7 @@ if __name__ == "__main__":
     main()
     
 '''
-
+'''
 from src.loader import load_documents
 from src.splitter import split_documents
 from src.vector_store import create_vector_store
@@ -192,5 +192,82 @@ def main():
 if __name__ == "__main__":
     main()
     
+'''
+from src.loader import load_documents
+from src.splitter import split_documents
+from src.vector_store import create_vector_store
+from src.retriever import load_retriever
+from src.rag_chain import create_rag_chain
 
 
+def main():
+
+    print("=" * 60)
+    print("🤖 AI Resume Assistant")
+    print("=" * 60)
+
+    print("\n📄 Loading Resume...")
+
+    documents = load_documents()
+
+    print("✂ Splitting Resume...")
+
+    chunks = split_documents(documents)
+
+    print(f"✅ Total Chunks : {len(chunks)}")
+
+    print("\n🧠 Creating Vector Database...")
+
+    create_vector_store(chunks)
+
+    print("✅ Vector Database Ready!")
+
+    print("\n🔍 Loading Retriever...")
+
+    retriever = load_retriever()
+
+    print("✅ Retriever Ready!")
+
+    print("\n⚡ Creating RAG Chain...")
+
+    rag_chain = create_rag_chain(retriever)
+
+    print("✅ RAG Chain Ready!")
+
+    print("\n" + "=" * 60)
+    print("🎉 Resume Assistant Ready")
+    print("Type 'exit' to quit")
+    print("=" * 60)
+
+    while True:
+
+        question = input("\n👤 You : ").strip()
+
+        if question.lower() == "exit":
+            print("\n👋 Goodbye!")
+            break
+
+        if question == "":
+            continue
+
+        try:
+
+            response = rag_chain.invoke(
+                {
+                    "input": question
+                }
+            )
+
+            print("\n🤖 Assistant\n")
+
+            print(response["answer"])
+
+        except Exception as e:
+
+            print("\n❌ Error")
+
+            print(e)
+
+
+if __name__ == "__main__":
+    main()
