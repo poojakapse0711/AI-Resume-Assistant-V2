@@ -16,7 +16,7 @@ if __name__ == "__main__":
 
     main()
  '''   
-    
+'''    
 from src.loader import load_documents
 from src.splitter import split_documents
 
@@ -37,6 +37,40 @@ def main():
     print("=" * 60)
 
     print(chunks[0].metadata)
+
+
+if __name__ == "__main__":
+    main()
+    
+'''
+
+from src.loader import load_documents
+from src.splitter import split_documents
+from src.vector_store import create_vector_store
+
+
+def main():
+
+    print("=" * 60)
+    print("AI Resume Assistant")
+    print("=" * 60)
+
+    print("\nLoading PDF...")
+    documents = load_documents()
+
+    print("Splitting Documents...")
+    chunks = split_documents(documents)
+
+    print(f"Total Chunks : {len(chunks)}")
+
+    print("\nCreating Vector Store...")
+
+    create_vector_store(chunks)
+
+    print("\n✅ Vector Database Created Successfully!")
+
+    print("\nSaved in:")
+    print("faiss_index/")
 
 
 if __name__ == "__main__":

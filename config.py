@@ -14,3 +14,5 @@ CHUNK_SIZE = 500
 CHUNK_OVERLAP = 100
 
 PDF_PATH = "data/resume.pdf"
+
+VECTOR_DB_PATH = "faiss_index"
