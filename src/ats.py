@@ -1,4 +1,11 @@
+from src.services import ask_ai
+
+
 def analyze_resume(rag_chain, job_description):
+    """
+    Analyze the uploaded resume against a Job Description
+    and generate an ATS report.
+    """
 
     prompt = f"""
 You are an experienced ATS (Applicant Tracking System).
@@ -9,10 +16,10 @@ Job Description:
 
 {job_description}
 
-Generate the following report in markdown format.
+Generate the following report in Markdown format.
 
 # ATS Score
-Give a score out of 100.
+Provide a score out of 100.
 
 # Matching Skills
 
@@ -24,13 +31,7 @@ Give a score out of 100.
 
 # Resume Improvement Suggestions
 
-Be specific and practical.
+Be specific, practical, and recruiter-friendly.
 """
 
-    response = rag_chain.invoke(
-        {
-            "input": prompt
-        }
-    )
-
-    return response["answer"]
+    return ask_ai(rag_chain, prompt)

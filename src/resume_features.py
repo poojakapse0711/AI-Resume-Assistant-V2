@@ -1,108 +1,105 @@
+from src.services import ask_ai
+
+
 def generate_summary(rag_chain):
-
-    prompt = """
-    Give a professional summary of this resume.
-
-    Include:
-
-    • Candidate Profile
-
-    • Years of Experience
-
-    • Technical Skills
-
-    • Domain Knowledge
-
-    Keep it under 200 words.
+    """
+    Generate a professional summary of the uploaded resume.
     """
 
-    response = rag_chain.invoke(
-        {
-            "input": prompt
-        }
-    )
+    prompt = """
+You are an expert HR recruiter.
 
-    return response["answer"]
+Generate a professional summary of this resume.
+
+Include:
+
+• Candidate Profile
+
+• Years of Experience
+
+• Technical Skills
+
+• Domain Knowledge
+
+Keep the summary under 200 words.
+"""
+
+    return ask_ai(rag_chain, prompt)
 
 
 def extract_skills(rag_chain):
-
-    prompt = """
-    Extract all technical skills from this resume.
-
-    Group them into:
-
-    • Programming Languages
-
-    • Databases
-
-    • Frameworks
-
-    • Cloud
-
-    • Tools
-
-    • Soft Skills
+    """
+    Extract technical and soft skills from the resume.
     """
 
-    response = rag_chain.invoke(
-        {
-            "input": prompt
-        }
-    )
+    prompt = """
+Extract all skills from this resume.
 
-    return response["answer"]
+Group them into the following categories.
+
+Programming Languages
+
+Databases
+
+Frameworks
+
+Cloud Technologies
+
+Tools
+
+Soft Skills
+
+Return the result in Markdown format.
+"""
+
+    return ask_ai(rag_chain, prompt)
 
 
 def interview_questions(rag_chain):
-
-    prompt = """
-    Based on this resume,
-
-    generate 10 interview questions.
-
-    Mix:
-
-    • Technical
-
-    • Project
-
-    • Behavioural
+    """
+    Generate interview questions based on the resume.
     """
 
-    response = rag_chain.invoke(
-        {
-            "input": prompt
-        }
-    )
+    prompt = """
+Generate 10 interview questions based on this resume.
 
-    return response["answer"]
+Include:
+
+• Technical Questions
+
+• Project Based Questions
+
+• Behavioural Questions
+
+Return the output in Markdown.
+"""
+
+    return ask_ai(rag_chain, prompt)
 
 
 def improvement_suggestions(rag_chain):
-
-    prompt = """
-    Review this resume.
-
-    Suggest improvements.
-
-    Include
-
-    • ATS
-
-    • Formatting
-
-    • Missing Skills
-
-    • Resume Quality
-
-    Give practical suggestions.
+    """
+    Suggest improvements for the resume.
     """
 
-    response = rag_chain.invoke(
-        {
-            "input": prompt
-        }
-    )
+    prompt = """
+Review this resume.
 
-    return response["answer"]
+Suggest improvements.
+
+Focus on:
+
+• ATS Optimization
+
+• Resume Formatting
+
+• Missing Skills
+
+• Quantifying Achievements
+
+• Professional Summary
+
+Return the result in Markdown.
+"""
+
+    return ask_ai(rag_chain, prompt)
