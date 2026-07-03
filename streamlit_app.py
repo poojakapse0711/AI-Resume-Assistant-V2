@@ -2,6 +2,12 @@ import os
 import streamlit as st
 
 from src.backend import initialize_rag
+from src.resume_features import (
+    generate_summary,
+    extract_skills,
+    interview_questions,
+    improvement_suggestions,
+)
 
 st.set_page_config(
     page_title="AI Resume Assistant",
@@ -13,7 +19,7 @@ st.title("🤖 AI Resume Assistant")
 
 st.markdown("---")
 
-# ---------- Session State ----------
+# ---------------- Session State ---------------- #
 
 if "rag_chain" not in st.session_state:
     st.session_state.rag_chain = None
@@ -21,7 +27,7 @@ if "rag_chain" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ---------- Upload Resume ----------
+# ---------------- Upload ---------------- #
 
 uploaded_file = st.file_uploader(
     "📄 Upload Resume",
@@ -40,58 +46,131 @@ if uploaded_file is not None and st.session_state.rag_chain is None:
     with open(pdf_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    st.success("✅ Resume Uploaded!")
-
-    with st.spinner("Creating AI Knowledge Base..."):
+    with st.spinner("Creating Knowledge Base..."):
 
         st.session_state.rag_chain = initialize_rag(pdf_path)
 
-    st.success("🤖 AI Assistant Ready!")
+    st.success("✅ Resume Uploaded Successfully!")
 
-# ---------- Display Chat History ----------
-
-for message in st.session_state.messages:
-
-    with st.chat_message(message["role"]):
-
-        st.markdown(message["content"])
-
-# ---------- Chat ----------
+# ---------------- Main UI ---------------- #
 
 if st.session_state.rag_chain is not None:
 
-    prompt = st.chat_input(
-        "Ask anything about your resume..."
+    chat_tab, summary_tab, skills_tab, interview_tab, suggestion_tab = st.tabs(
+        [
+            "💬 Chat",
+            "📋 Summary",
+            "🛠 Skills",
+            "🎤 Interview",
+            "📈 Suggestions",
+        ]
     )
 
-    if prompt:
+    # ---------------- CHAT ---------------- #
 
-        st.session_state.messages.append(
-            {
-                "role": "user",
-                "content": prompt
-            }
+    with chat_tab:
+
+        for msg in st.session_state.messages:
+
+            with st.chat_message(msg["role"]):
+                st.markdown(msg["content"])
+
+        prompt = st.chat_input(
+            "Ask anything about your resume..."
         )
 
-        with st.chat_message("user"):
-            st.markdown(prompt)
+        if prompt:
 
-        with st.spinner("Thinking..."):
-
-            response = st.session_state.rag_chain.invoke(
+            st.session_state.messages.append(
                 {
-                    "input": prompt
+                    "role": "user",
+                    "content": prompt
                 }
             )
 
-            answer = response["answer"]
+            with st.chat_message("user"):
+                st.markdown(prompt)
 
-        st.session_state.messages.append(
-            {
-                "role": "assistant",
-                "content": answer
-            }
-        )
+            with st.spinner("Thinking..."):
 
-        with st.chat_message("assistant"):
-            st.markdown(answer)
+                response = st.session_state.rag_chain.invoke(
+                    {
+                        "input": prompt
+                    }
+                )
+
+                answer = response["answer"]
+
+            st.session_state.messages.append(
+                {
+                    "role": "assistant",
+                    "content": answer
+                }
+            )
+
+            with st.chat_message("assistant"):
+                st.markdown(answer)
+
+    # ---------------- SUMMARY ---------------- #
+
+    with summary_tab:
+
+        st.subheader("Resume Summary")
+
+        if st.button("Generate Summary"):
+
+            with st.spinner("Generating Summary..."):
+
+                summary = generate_summary(
+                    st.session_state.rag_chain
+                )
+
+            st.write(summary)
+
+    # ---------------- SKILLS ---------------- #
+
+    with skills_tab:
+
+        st.subheader("Technical Skills")
+
+        if st.button("Extract Skills"):
+
+            with st.spinner("Extracting Skills..."):
+
+                skills = extract_skills(
+                    st.session_state.rag_chain
+                )
+
+            st.write(skills)
+
+    # ---------------- INTERVIEW ---------------- #
+
+    with interview_tab:
+
+        st.subheader("Interview Questions")
+
+        if st.button("Generate Questions"):
+
+            with st.spinner("Generating Questions..."):
+
+                questions = interview_questions(
+                    st.session_state.rag_chain
+                )
+
+            st.write(questions)
+
+    # ---------------- SUGGESTIONS ---------------- #
+
+    with suggestion_tab:
+
+        st.subheader("Resume Improvement Suggestions")
+
+        if st.button("Generate Suggestions"):
+
+            with st.spinner("Analyzing Resume..."):
+
+                suggestions = improvement_suggestions(
+                    st.session_state.rag_chain
+                )
+
+            st.write(suggestions)
