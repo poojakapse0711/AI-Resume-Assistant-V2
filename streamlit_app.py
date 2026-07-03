@@ -8,6 +8,11 @@ from src.resume_features import (
     interview_questions,
     improvement_suggestions,
 )
+from src.ats import analyze_resume
+
+# ----------------------------------------------------
+# Page Configuration
+# ----------------------------------------------------
 
 st.set_page_config(
     page_title="AI Resume Assistant",
@@ -16,10 +21,11 @@ st.set_page_config(
 )
 
 st.title("🤖 AI Resume Assistant")
-
 st.markdown("---")
 
-# ---------------- Session State ---------------- #
+# ----------------------------------------------------
+# Session State
+# ----------------------------------------------------
 
 if "rag_chain" not in st.session_state:
     st.session_state.rag_chain = None
@@ -27,7 +33,9 @@ if "rag_chain" not in st.session_state:
 if "messages" not in st.session_state:
     st.session_state.messages = []
 
-# ---------------- Upload ---------------- #
+# ----------------------------------------------------
+# Resume Upload
+# ----------------------------------------------------
 
 uploaded_file = st.file_uploader(
     "📄 Upload Resume",
@@ -46,34 +54,48 @@ if uploaded_file is not None and st.session_state.rag_chain is None:
     with open(pdf_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    with st.spinner("Creating Knowledge Base..."):
+    with st.spinner("Creating AI Knowledge Base..."):
 
         st.session_state.rag_chain = initialize_rag(pdf_path)
 
     st.success("✅ Resume Uploaded Successfully!")
 
-# ---------------- Main UI ---------------- #
+# ----------------------------------------------------
+# Main Application
+# ----------------------------------------------------
 
 if st.session_state.rag_chain is not None:
 
-    chat_tab, summary_tab, skills_tab, interview_tab, suggestion_tab = st.tabs(
+    (
+        chat_tab,
+        summary_tab,
+        skills_tab,
+        interview_tab,
+        suggestion_tab,
+        ats_tab,
+    ) = st.tabs(
         [
             "💬 Chat",
             "📋 Summary",
             "🛠 Skills",
             "🎤 Interview",
             "📈 Suggestions",
+            "📊 ATS Score",
         ]
     )
 
-    # ---------------- CHAT ---------------- #
+    # ====================================================
+    # CHAT TAB
+    # ====================================================
 
     with chat_tab:
 
-        for msg in st.session_state.messages:
+        st.subheader("Chat with your Resume")
 
-            with st.chat_message(msg["role"]):
-                st.markdown(msg["content"])
+        for message in st.session_state.messages:
+
+            with st.chat_message(message["role"]):
+                st.markdown(message["content"])
 
         prompt = st.chat_input(
             "Ask anything about your resume..."
@@ -84,7 +106,7 @@ if st.session_state.rag_chain is not None:
             st.session_state.messages.append(
                 {
                     "role": "user",
-                    "content": prompt
+                    "content": prompt,
                 }
             )
 
@@ -104,18 +126,20 @@ if st.session_state.rag_chain is not None:
             st.session_state.messages.append(
                 {
                     "role": "assistant",
-                    "content": answer
+                    "content": answer,
                 }
             )
 
             with st.chat_message("assistant"):
                 st.markdown(answer)
 
-    # ---------------- SUMMARY ---------------- #
+    # ====================================================
+    # SUMMARY TAB
+    # ====================================================
 
     with summary_tab:
 
-        st.subheader("Resume Summary")
+        st.subheader("📋 Resume Summary")
 
         if st.button("Generate Summary"):
 
@@ -125,13 +149,15 @@ if st.session_state.rag_chain is not None:
                     st.session_state.rag_chain
                 )
 
-            st.write(summary)
+            st.markdown(summary)
 
-    # ---------------- SKILLS ---------------- #
+    # ====================================================
+    # SKILLS TAB
+    # ====================================================
 
     with skills_tab:
 
-        st.subheader("Technical Skills")
+        st.subheader("🛠 Technical Skills")
 
         if st.button("Extract Skills"):
 
@@ -141,15 +167,17 @@ if st.session_state.rag_chain is not None:
                     st.session_state.rag_chain
                 )
 
-            st.write(skills)
+            st.markdown(skills)
 
-    # ---------------- INTERVIEW ---------------- #
+    # ====================================================
+    # INTERVIEW TAB
+    # ====================================================
 
     with interview_tab:
 
-        st.subheader("Interview Questions")
+        st.subheader("🎤 Interview Questions")
 
-        if st.button("Generate Questions"):
+        if st.button("Generate Interview Questions"):
 
             with st.spinner("Generating Questions..."):
 
@@ -157,13 +185,15 @@ if st.session_state.rag_chain is not None:
                     st.session_state.rag_chain
                 )
 
-            st.write(questions)
+            st.markdown(questions)
 
-    # ---------------- SUGGESTIONS ---------------- #
+    # ====================================================
+    # SUGGESTIONS TAB
+    # ====================================================
 
     with suggestion_tab:
 
-        st.subheader("Resume Improvement Suggestions")
+        st.subheader("📈 Resume Improvement Suggestions")
 
         if st.button("Generate Suggestions"):
 
@@ -173,4 +203,34 @@ if st.session_state.rag_chain is not None:
                     st.session_state.rag_chain
                 )
 
-            st.write(suggestions)
+            st.markdown(suggestions)
+
+    # ====================================================
+    # ATS TAB
+    # ====================================================
+
+    with ats_tab:
+
+        st.subheader("📊 ATS Resume Analyzer")
+
+        job_description = st.text_area(
+            "Paste Job Description",
+            height=250
+        )
+
+        if st.button("Analyze Resume"):
+
+            if job_description.strip() == "":
+
+                st.warning("Please paste a Job Description.")
+
+            else:
+
+                with st.spinner("Analyzing Resume..."):
+
+                    report = analyze_resume(
+                        st.session_state.rag_chain,
+                        job_description,
+                    )
+
+                st.markdown(report)
