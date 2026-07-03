@@ -1,5 +1,7 @@
-'''
+import os
 import streamlit as st
+
+from src.backend import initialize_rag
 
 st.set_page_config(
     page_title="AI Resume Assistant",
@@ -9,53 +11,49 @@ st.set_page_config(
 
 st.title("🤖 AI Resume Assistant")
 
-st.write(
-    "Welcome to your AI Resume Assistant built using "
-    "Gemini + LangChain + FAISS."
-)
-
-st.success("Streamlit is working successfully!")
-'''
-import streamlit as st
-
-from src.backend import initialize_rag
-
-st.set_page_config(
-    page_title="AI Resume Assistant",
-    page_icon="🤖",
-    layout="wide",
-)
-
-st.title("🤖 AI Resume Assistant")
-
 st.markdown("---")
 
-st.write(
-    "Ask questions about your resume using Gemini + LangChain + FAISS."
+uploaded_file = st.file_uploader(
+    "📄 Upload Resume",
+    type=["pdf"]
 )
 
-with st.spinner("Loading AI Resume Assistant..."):
+if uploaded_file is not None:
 
-    rag_chain = initialize_rag()
+    os.makedirs("data", exist_ok=True)
 
-st.success("AI Resume Assistant Ready!")
+    pdf_path = os.path.join(
+        "data",
+        uploaded_file.name
+    )
 
-question = st.text_input(
-    "Ask a question"
-)
+    with open(pdf_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
 
-if st.button("Ask AI"):
+    st.success("✅ Resume uploaded successfully!")
 
-    if question.strip() != "":
+    with st.spinner("Creating AI Knowledge Base..."):
 
-        with st.spinner("Thinking..."):
+        rag_chain = initialize_rag(pdf_path)
 
-            response = rag_chain.invoke(
-                {
-                    "input": question
-                }
-            )
+    st.success("🤖 AI Assistant Ready!")
 
-        st.markdown("### 🤖 Answer")
+    question = st.text_input(
+        "Ask a question about your resume"
+    )
 
-        st.write(response["answer"])
+    if st.button("Ask AI"):
+
+        if question.strip() != "":
+
+            with st.spinner("Thinking..."):
+
+                response = rag_chain.invoke(
+                    {
+                        "input": question
+                    }
+                )
+
+            st.markdown("## 🤖 Answer")
+
+            st.write(response["answer"])
