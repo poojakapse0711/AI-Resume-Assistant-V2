@@ -13,12 +13,22 @@ st.title("🤖 AI Resume Assistant")
 
 st.markdown("---")
 
+# ---------- Session State ----------
+
+if "rag_chain" not in st.session_state:
+    st.session_state.rag_chain = None
+
+if "messages" not in st.session_state:
+    st.session_state.messages = []
+
+# ---------- Upload Resume ----------
+
 uploaded_file = st.file_uploader(
     "📄 Upload Resume",
     type=["pdf"]
 )
 
-if uploaded_file is not None:
+if uploaded_file is not None and st.session_state.rag_chain is None:
 
     os.makedirs("data", exist_ok=True)
 
@@ -30,30 +40,58 @@ if uploaded_file is not None:
     with open(pdf_path, "wb") as f:
         f.write(uploaded_file.getbuffer())
 
-    st.success("✅ Resume uploaded successfully!")
+    st.success("✅ Resume Uploaded!")
 
     with st.spinner("Creating AI Knowledge Base..."):
 
-        rag_chain = initialize_rag(pdf_path)
+        st.session_state.rag_chain = initialize_rag(pdf_path)
 
     st.success("🤖 AI Assistant Ready!")
 
-    question = st.text_input(
-        "Ask a question about your resume"
+# ---------- Display Chat History ----------
+
+for message in st.session_state.messages:
+
+    with st.chat_message(message["role"]):
+
+        st.markdown(message["content"])
+
+# ---------- Chat ----------
+
+if st.session_state.rag_chain is not None:
+
+    prompt = st.chat_input(
+        "Ask anything about your resume..."
     )
 
-    if st.button("Ask AI"):
+    if prompt:
 
-        if question.strip() != "":
+        st.session_state.messages.append(
+            {
+                "role": "user",
+                "content": prompt
+            }
+        )
 
-            with st.spinner("Thinking..."):
+        with st.chat_message("user"):
+            st.markdown(prompt)
 
-                response = rag_chain.invoke(
-                    {
-                        "input": question
-                    }
-                )
+        with st.spinner("Thinking..."):
 
-            st.markdown("## 🤖 Answer")
+            response = st.session_state.rag_chain.invoke(
+                {
+                    "input": prompt
+                }
+            )
 
-            st.write(response["answer"])
+            answer = response["answer"]
+
+        st.session_state.messages.append(
+            {
+                "role": "assistant",
+                "content": answer
+            }
+        )
+
+        with st.chat_message("assistant"):
+            st.markdown(answer)
