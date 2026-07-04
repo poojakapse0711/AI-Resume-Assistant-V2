@@ -225,7 +225,7 @@ The following diagram represents the end-to-end workflow of the application.
 ---
 
 # 📸 Screenshots
-
+<!--
 ## 🏠 Home Page
 
 <p align="center">
@@ -241,7 +241,7 @@ The following diagram represents the end-to-end workflow of the application.
 </p>
 
 ---
-
+-->
 ## 💬 Chat with Resume
 
 <p align="center">
