@@ -1,3 +1,9 @@
+"""
+Future Enhancement:
+AI Cover Letter Generator
+Currently not integrated into the Streamlit UI.
+"""
+
 from src.services import ask_ai
 
 
